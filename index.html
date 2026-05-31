@@ -250,7 +250,7 @@
             <div class="container">
                 <!-- Sidebar Overlay (Mobile) -->
                 <div id="sidebarOverlay" class="sidebar-overlay"></div>
-                
+
                 <!-- Sidebar -->
                 <aside class="sidebar">
                     <div class="sidebar-header">
@@ -273,19 +273,20 @@
                         Add Password
                     </button>
                     <div class="vault-actions">
-                        <button id="importPasswordsBtn" class="btn-secondary-sidebar" type="button" title="Import passwords">
+                        <button id="importPasswordsBtn" class="btn-secondary-sidebar" type="button" title="Import CSV or JSON">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
                                 <path d="M440-160v-327L336-383l-56-57 200-200 200 200-56 57-104-104v327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Zm0-680h480v160h80v-160q0-33-23.5-56.5T720-840H240q-33 0-56.5 23.5T160-760v160h80v-160Z"/>
                             </svg>
                             Import
                         </button>
-                        <button id="exportPasswordsBtn" class="btn-secondary-sidebar" type="button" title="Export passwords">
+                        <button id="exportPasswordsBtn" class="btn-secondary-sidebar" type="button" title="Export as CSV">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
                                 <path d="M440-800v327L336-577l-56 57 200 200 200-200-56-57-104 104v-327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Zm0-680h480v160h80v-160q0-33-23.5-56.5T720-840H240q-33 0-56.5 23.5T160-760v160h80v-160Z"/>
                             </svg>
                             Export
                         </button>
-                        <input type="file" id="importPasswordsInput" accept=".json,application/json" hidden>
+                        <!-- Accept both CSV and JSON -->
+                        <input type="file" id="importPasswordsInput" accept=".csv,.json,text/csv,application/json" hidden>
                     </div>
                     <div class="password-list">
                         <h3>Your Passwords</h3>
@@ -296,18 +297,81 @@
 
                 <!-- Main Panel -->
                 <section class="main-panel">
-                    <!-- Empty State -->
+
+                    <!-- ===== EMPTY STATE (redesigned) ===== -->
                     <div id="emptyState" class="empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="empty-icon">
-                            <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
-                        </svg>
-                        <h2 id="emptyStateTitle">No Password Selected</h2>
-                        <p id="emptyStateText">Add a new password or select one from the list to get started</p>
-                        <div class="empty-actions">
-                            <button id="emptyAddPasswordBtn" class="btn-primary" type="button">Add Password</button>
-                            <button id="emptyImportPasswordsBtn" class="btn-secondary" type="button">Import</button>
+
+                        <!-- LEFT column: headline + CTAs -->
+                        <div class="empty-left">
+                            <div class="empty-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                    <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                                </svg>
+                            </div>
+                            <p class="empty-kicker">SecureFire Vault</p>
+                            <h2 id="emptyStateTitle">Your vault is empty</h2>
+                            <p id="emptyStateText">Store all your passwords in one secure place. Add an entry manually or import from a CSV or JSON file.</p>
+                            <div class="empty-actions">
+                                <button id="emptyAddPasswordBtn" class="btn-primary" type="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                                    </svg>
+                                    Add Password
+                                </button>
+                                <button id="emptyImportPasswordsBtn" class="btn-secondary" type="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M440-160v-327L336-383l-56-57 200-200 200 200-56 57-104-104v327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Z"/>
+                                    </svg>
+                                    Import File
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- RIGHT column: feature cards -->
+                        <div class="empty-right">
+                            <div class="empty-features">
+
+                                <div class="empty-feature">
+                                    <div class="ef-icon ef-icon--secure">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                            <path d="M480-80q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ef-body">
+                                        <div class="ef-title">Encrypted Storage</div>
+                                        <div class="ef-text">Passwords secured in Firebase — nobody else can read them.</div>
+                                    </div>
+                                </div>
+
+                                <div class="empty-feature">
+                                    <div class="ef-icon ef-icon--import">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                            <path d="M440-160v-327L336-383l-56-57 200-200 200 200-56 57-104-104v327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Zm0-680h480v160h80v-160q0-33-23.5-56.5T720-840H240q-33 0-56.5 23.5T160-760v160h80v-160Z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ef-body">
+                                        <div class="ef-title">CSV &amp; JSON Import</div>
+                                        <div class="ef-text">Migrate from any password manager in seconds.</div>
+                                    </div>
+                                </div>
+
+                                <div class="empty-feature">
+                                    <div class="ef-icon ef-icon--export">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                            <path d="M440-800v327L336-577l-56 57 200 200 200-200-56-57-104 104v-327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ef-body">
+                                        <div class="ef-title">One-Click CSV Export</div>
+                                        <div class="ef-text">Back up your entire vault as a CSV file anytime.</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
                     </div>
+                    <!-- ===== END EMPTY STATE ===== -->
 
                     <!-- Password Detail View -->
                     <div id="passwordDetailView" class="password-detail" style="display: none;">
