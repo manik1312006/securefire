@@ -81,21 +81,14 @@ tabBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
         const tab = btn.dataset.tab;
-        
-        // Remove active from all tabs
         tabBtns.forEach(b => b.classList.remove('active'));
-        // Add active to clicked tab
         btn.classList.add('active');
-        
-        // Hide all forms
         authForms.forEach(form => form.classList.remove('active'));
-        // Show selected form
         const formId = `${tab}Form`;
         const selectedForm = document.getElementById(formId);
         if (selectedForm) {
             selectedForm.classList.add('active');
         }
-
         window.scrollTo(0, 0);
         authContainer.scrollTop = 0;
         setTimeout(() => {
@@ -124,27 +117,11 @@ mobileMenuBtn.addEventListener('click', () => {
     }
 });
 
-// Close sidebar when clicking overlay
 sidebarOverlay.addEventListener('click', closeMobileMenu);
 
-// Close sidebar when clicking on a password
-const handlePasswordListClick = () => {
-    const listItems = document.querySelectorAll('.list-item');
-    listItems.forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                closeMobileMenu();
-            }
-        });
-    });
-};
-
-// Update menu button visibility on window resize
 function updateMenuButtonVisibility() {
     const isMobile = window.innerWidth <= 768;
     mobileMenuBtn.style.display = isMobile ? 'flex' : 'none';
-    
-    // Close menu if resizing to desktop
     if (!isMobile) {
         closeMobileMenu();
     }
@@ -167,10 +144,8 @@ document.querySelectorAll('.toggle-password').forEach(btn => {
 function showToast(message, duration = 3000) {
     toast.textContent = message;
     toast.classList.remove('show');
-    // Trigger reflow to restart animation
     void toast.offsetWidth;
     toast.classList.add('show');
-    
     setTimeout(() => {
         toast.classList.remove('show');
     }, duration);
@@ -239,7 +214,6 @@ registerForm.addEventListener('submit', async (e) => {
         await createUserWithEmailAndPassword(auth, email, password);
         showToast('Registration successful!');
         registerForm.reset();
-        // Switch to login tab
         document.querySelector('[data-tab="login"]').click();
     } catch (error) {
         errorEl.textContent = getErrorMessage(error.code);
@@ -440,7 +414,6 @@ function renderPasswordList(preferredId = selectedPasswordId) {
             password.username,
             password.notes
         ].join(' ').toLowerCase();
-
         return searchable.includes(query);
     });
 
@@ -450,7 +423,7 @@ function renderPasswordList(preferredId = selectedPasswordId) {
 
     if (allPasswords.length === 0) {
         noPasswordsMessage.textContent = 'No saved passwords yet';
-        showEmptyState('Your vault is empty', 'Add your first password or import a JSON backup.');
+        showEmptyState('Your vault is empty', 'Add your first password or import from a CSV or JSON file.');
         return;
     }
 
@@ -475,14 +448,135 @@ passwordSearchInput.addEventListener('input', () => {
     renderPasswordList();
 });
 
-// Export passwords to a local JSON file
+// ============================================================
+// CSV HELPERS
+// ============================================================
+
+/**
+ * Escape a single value for CSV output.
+ * Wraps in quotes if the value contains commas, quotes, or newlines.
+ */
+function csvEscape(value) {
+    const str = String(value == null ? '' : value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+}
+
+/**
+ * Convert an array of password objects to a CSV string.
+ */
+function convertToCSV(passwords) {
+    const headers = ['website', 'username', 'password', 'notes', 'createdAt', 'updatedAt'];
+    const headerRow = headers.join(',');
+    const rows = passwords.map(p =>
+        headers.map(h => csvEscape(p[h] || '')).join(',')
+    );
+    return [headerRow, ...rows].join('\r\n');
+}
+
+/**
+ * Parse a raw CSV string into an array of arrays (rows of fields).
+ * Handles quoted fields, escaped quotes (""), and CRLF/LF line endings.
+ */
+function parseCSVText(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentField = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < text.length) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (inQuotes) {
+            if (ch === '"' && next === '"') {
+                // Escaped quote inside quoted field
+                currentField += '"';
+                i += 2;
+            } else if (ch === '"') {
+                inQuotes = false;
+                i++;
+            } else {
+                currentField += ch;
+                i++;
+            }
+        } else {
+            if (ch === '"') {
+                inQuotes = true;
+                i++;
+            } else if (ch === ',') {
+                currentRow.push(currentField);
+                currentField = '';
+                i++;
+            } else if (ch === '\r' && next === '\n') {
+                currentRow.push(currentField);
+                currentField = '';
+                rows.push(currentRow);
+                currentRow = [];
+                i += 2;
+            } else if (ch === '\n' || ch === '\r') {
+                currentRow.push(currentField);
+                currentField = '';
+                rows.push(currentRow);
+                currentRow = [];
+                i++;
+            } else {
+                currentField += ch;
+                i++;
+            }
+        }
+    }
+
+    // Push last field/row if non-empty
+    if (currentField !== '' || currentRow.length > 0) {
+        currentRow.push(currentField);
+        if (currentRow.some(f => f !== '')) {
+            rows.push(currentRow);
+        }
+    }
+
+    return rows;
+}
+
+/**
+ * Convert parsed CSV rows to password objects using the header row as keys.
+ */
+function csvRowsToPasswords(rows) {
+    if (rows.length < 2) return [];
+
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    const passwords = [];
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        // Skip blank rows
+        if (row.every(cell => !cell.trim())) continue;
+
+        const record = {};
+        headers.forEach((header, idx) => {
+            record[header] = (row[idx] || '').trim();
+        });
+
+        const normalized = normalizeImportedPassword(record);
+        if (normalized) passwords.push(normalized);
+    }
+
+    return passwords;
+}
+
+// ============================================================
+// EXPORT — CSV
+// ============================================================
 exportPasswordsBtn.addEventListener('click', async () => {
     if (!currentUser) {
         showToast('Please log in first');
         return;
     }
 
-    if (!confirm('The export file will contain readable passwords. Keep it somewhere safe. Continue?')) {
+    if (!confirm('The export file will contain your passwords in plain text. Store it somewhere safe. Continue?')) {
         return;
     }
 
@@ -491,14 +585,14 @@ exportPasswordsBtn.addEventListener('click', async () => {
         const dbRef = ref(database);
         const snapshot = await get(child(dbRef, `users/${currentUser.uid}/passwords`));
         const passwords = snapshot.exists() ? snapshot.val() : {};
-        const passwordEntries = Object.entries(passwords).map(([id, password]) => ({
+        const passwordEntries = Object.entries(passwords).map(([id, p]) => ({
             id,
-            website: password.website || '',
-            username: password.username || '',
-            password: password.password || '',
-            notes: password.notes || '',
-            createdAt: password.createdAt || '',
-            updatedAt: password.updatedAt || ''
+            website:   p.website   || '',
+            username:  p.username  || '',
+            password:  p.password  || '',
+            notes:     p.notes     || '',
+            createdAt: p.createdAt || '',
+            updatedAt: p.updatedAt || ''
         }));
 
         if (passwordEntries.length === 0) {
@@ -506,24 +600,17 @@ exportPasswordsBtn.addEventListener('click', async () => {
             return;
         }
 
-        const exportData = {
-            app: 'SecureFire',
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            passwordCount: passwordEntries.length,
-            passwords: passwordEntries
-        };
-
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const csvContent = convertToCSV(passwordEntries);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const downloadUrl = URL.createObjectURL(blob);
         const downloadLink = document.createElement('a');
         downloadLink.href = downloadUrl;
-        downloadLink.download = `securefire-passwords-${new Date().toISOString().slice(0, 10)}.json`;
+        downloadLink.download = `securefire-passwords-${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         downloadLink.remove();
         URL.revokeObjectURL(downloadUrl);
-        showToast(`Exported ${passwordEntries.length} password${passwordEntries.length === 1 ? '' : 's'}`);
+        showToast(`Exported ${passwordEntries.length} password${passwordEntries.length === 1 ? '' : 's'} as CSV`);
     } catch (error) {
         showToast('Error exporting passwords');
         console.error('Error exporting passwords:', error);
@@ -532,13 +619,14 @@ exportPasswordsBtn.addEventListener('click', async () => {
     }
 });
 
-// Import passwords from a SecureFire JSON export or a simple JSON array/object
+// ============================================================
+// IMPORT — CSV or JSON
+// ============================================================
 importPasswordsBtn.addEventListener('click', () => {
     if (!currentUser) {
         showToast('Please log in first');
         return;
     }
-
     importPasswordsInput.click();
 });
 
@@ -548,8 +636,18 @@ importPasswordsInput.addEventListener('change', async () => {
 
     try {
         const fileText = await file.text();
-        const parsed = JSON.parse(fileText);
-        const passwordsToImport = parseImportedPasswords(parsed);
+        const fileName = file.name.toLowerCase();
+        let passwordsToImport = [];
+
+        if (fileName.endsWith('.csv') || file.type === 'text/csv') {
+            // CSV import
+            const rows = parseCSVText(fileText);
+            passwordsToImport = csvRowsToPasswords(rows);
+        } else {
+            // JSON import (original behaviour)
+            const parsed = JSON.parse(fileText);
+            passwordsToImport = parseImportedPasswords(parsed);
+        }
 
         if (passwordsToImport.length === 0) {
             showToast('No valid passwords found in that file');
@@ -578,7 +676,7 @@ importPasswordsInput.addEventListener('change', async () => {
         await loadPasswords();
         showToast(`Imported ${passwordsToImport.length} password${passwordsToImport.length === 1 ? '' : 's'}`);
     } catch (error) {
-        showToast('Import failed. Choose a valid JSON file');
+        showToast('Import failed. Choose a valid CSV or JSON file.');
         console.error('Error importing passwords:', error);
     } finally {
         hideLoading();
@@ -586,6 +684,9 @@ importPasswordsInput.addEventListener('change', async () => {
     }
 });
 
+// ============================================================
+// JSON IMPORT HELPERS (kept for backward compatibility)
+// ============================================================
 function parseImportedPasswords(parsed) {
     const source = Array.isArray(parsed)
         ? parsed
@@ -605,10 +706,10 @@ function parseImportedPasswords(parsed) {
 function normalizeImportedPassword(record) {
     if (!record || typeof record !== 'object') return null;
 
-    const website = String(record.website || record.service || record.name || '').trim();
-    const username = String(record.username || record.email || record.login || '').trim();
+    const website  = String(record.website  || record.service || record.name  || '').trim();
+    const username = String(record.username || record.email   || record.login || '').trim();
     const password = record.password == null ? '' : String(record.password);
-    const notes = record.notes == null ? '' : String(record.notes);
+    const notes    = record.notes    == null ? '' : String(record.notes);
 
     if (!website || !username || !password) return null;
 
@@ -626,10 +727,12 @@ function createPasswordId(index = 0) {
     return `${Date.now().toString(36)}-${index}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-// Create List Item
+// ============================================================
+// LIST & DETAIL
+// ============================================================
 function createListItem(password, index) {
     const item = document.createElement('button');
-    const website = password.website || 'Untitled';
+    const website  = password.website  || 'Untitled';
     const username = password.username || 'No username';
 
     item.type = 'button';
@@ -654,14 +757,14 @@ function createListItem(password, index) {
 
     content.append(title, meta);
     item.append(icon, content);
-    
+
     item.addEventListener('click', () => {
         selectPassword(password.id);
         if (window.innerWidth <= 768) {
             closeMobileMenu();
         }
     });
-    
+
     return item;
 }
 
@@ -673,14 +776,13 @@ function selectPassword(id) {
     loadPasswordDetail(id);
 }
 
-// Load Password Detail
 async function loadPasswordDetail(id) {
     if (!currentUser) return;
 
     try {
         const dbRef = ref(database);
         const snapshot = await get(child(dbRef, `users/${currentUser.uid}/passwords/${id}`));
-        
+
         if (snapshot.exists()) {
             const password = snapshot.val();
             displayPasswordDetail(id, password);
@@ -690,59 +792,54 @@ async function loadPasswordDetail(id) {
     }
 }
 
-// Display Password Detail
 function displayPasswordDetail(id, password) {
     emptyState.style.display = 'none';
     passwordFormView.style.display = 'none';
     passwordDetailView.style.display = 'block';
 
-    const website = password.website || 'Untitled';
-    const username = password.username || '';
+    const website       = password.website  || 'Untitled';
+    const username      = password.username || '';
     const savedPassword = password.password || '';
-    const notes = password.notes || '';
-    
-    document.getElementById('detailTitle').textContent = website;
+    const notes         = password.notes    || '';
+
+    document.getElementById('detailTitle').textContent    = website;
     document.getElementById('detailSubtitle').textContent = username || 'No username saved';
-    document.getElementById('detailWebsite').textContent = website;
+    document.getElementById('detailWebsite').textContent  = website;
     document.getElementById('detailUsername').textContent = username;
-    document.getElementById('detailPassword').textContent = '••••••••';
-    document.getElementById('detailPassword').dataset.password = savedPassword;
-    document.getElementById('detailPassword').dataset.revealed = 'false';
+
+    const detailPasswordEl = document.getElementById('detailPassword');
+    detailPasswordEl.textContent            = '••••••••';
+    detailPasswordEl.dataset.password       = savedPassword;
+    detailPasswordEl.dataset.revealed       = 'false';
     document.getElementById('revealPasswordBtn').textContent = 'Reveal';
-    
+
     const notesContainer = document.getElementById('notesFieldContainer');
     document.getElementById('detailNotes').textContent = notes;
-    if (notes) {
-        notesContainer.style.display = 'block';
-    } else {
-        notesContainer.style.display = 'none';
-    }
-    
-    // Store current password ID
+    notesContainer.style.display = notes ? 'block' : 'none';
+
     passwordDetailView.dataset.currentId = id;
 }
 
-// Show Empty State
 function showEmptyState(title = 'No Password Selected', text = 'Add a new password or select one from the list to get started') {
     emptyStateTitle.textContent = title;
-    emptyStateText.textContent = text;
-    emptyState.style.display = 'flex';
-    passwordFormView.style.display = 'none';
-    passwordDetailView.style.display = 'none';
+    emptyStateText.textContent  = text;
+    emptyState.style.display    = 'flex';
+    passwordFormView.style.display    = 'none';
+    passwordDetailView.style.display  = 'none';
 }
 
 // Reveal Password
 document.getElementById('revealPasswordBtn').addEventListener('click', () => {
     const passwordEl = document.getElementById('detailPassword');
-    const revealed = passwordEl.dataset.revealed === 'true';
-    
+    const revealed   = passwordEl.dataset.revealed === 'true';
+
     if (revealed) {
-        passwordEl.textContent = '••••••••';
-        passwordEl.dataset.revealed = 'false';
+        passwordEl.textContent          = '••••••••';
+        passwordEl.dataset.revealed     = 'false';
         document.getElementById('revealPasswordBtn').textContent = 'Reveal';
     } else {
-        passwordEl.textContent = passwordEl.dataset.password;
-        passwordEl.dataset.revealed = 'true';
+        passwordEl.textContent          = passwordEl.dataset.password;
+        passwordEl.dataset.revealed     = 'true';
         document.getElementById('revealPasswordBtn').textContent = 'Hide';
     }
 });
@@ -759,33 +856,33 @@ document.getElementById('copyPasswordBtn').addEventListener('click', () => {
 
 // Edit Password Button
 document.getElementById('editPasswordBtn').addEventListener('click', () => {
-    const id = passwordDetailView.dataset.currentId;
-    const website = document.getElementById('detailWebsite').textContent;
+    const id       = passwordDetailView.dataset.currentId;
+    const website  = document.getElementById('detailWebsite').textContent;
     const username = document.getElementById('detailUsername').textContent;
     const password = document.getElementById('detailPassword').dataset.password;
-    const notes = document.getElementById('detailNotes').textContent;
-    
-    document.getElementById('formTitle').textContent = 'Edit Password';
-    document.getElementById('formWebsite').value = website;
+    const notes    = document.getElementById('detailNotes').textContent;
+
+    document.getElementById('formTitle').textContent  = 'Edit Password';
+    document.getElementById('formWebsite').value  = website;
     document.getElementById('formUsername').value = username;
     document.getElementById('formPassword').value = password;
-    document.getElementById('formNotes').value = notes;
-    
+    document.getElementById('formNotes').value    = notes;
+
     passwordForm.dataset.mode = 'edit';
-    passwordForm.dataset.id = id;
-    
-    emptyState.style.display = 'none';
+    passwordForm.dataset.id   = id;
+
+    emptyState.style.display         = 'none';
     passwordDetailView.style.display = 'none';
-    passwordFormView.style.display = 'block';
+    passwordFormView.style.display   = 'block';
 });
 
 // Delete Password
 document.getElementById('deletePasswordBtn').addEventListener('click', async () => {
     if (!confirm('Are you sure you want to delete this password?')) return;
-    
+
     const id = passwordDetailView.dataset.currentId;
     if (!currentUser) return;
-    
+
     showLoading();
     try {
         await remove(ref(database, `users/${currentUser.uid}/passwords/${id}`));
@@ -805,12 +902,11 @@ function openAddPasswordForm() {
     passwordForm.reset();
     passwordForm.dataset.mode = 'add';
     delete passwordForm.dataset.id;
-    
-    emptyState.style.display = 'none';
+
+    emptyState.style.display         = 'none';
     passwordDetailView.style.display = 'none';
-    passwordFormView.style.display = 'block';
-    
-    // Close sidebar on mobile
+    passwordFormView.style.display   = 'block';
+
     if (window.innerWidth <= 768) {
         closeMobileMenu();
     }
@@ -823,45 +919,39 @@ emptyImportPasswordsBtn.addEventListener('click', () => importPasswordsBtn.click
 // Password Form Submit
 passwordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    const website = document.getElementById('formWebsite').value;
+
+    const website  = document.getElementById('formWebsite').value;
     const username = document.getElementById('formUsername').value;
     const password = document.getElementById('formPassword').value;
-    const notes = document.getElementById('formNotes').value;
-    
+    const notes    = document.getElementById('formNotes').value;
+
     if (!website || !username || !password) {
         showToast('Please fill in all required fields');
         return;
     }
-    
+
     if (!currentUser) return;
-    
+
     showLoading();
     try {
         const mode = passwordForm.dataset.mode;
-        let id = passwordForm.dataset.id;
-        
+        let id     = passwordForm.dataset.id;
+
         if (mode === 'add') {
             id = createPasswordId();
             await set(ref(database, `users/${currentUser.uid}/passwords/${id}`), {
-                website,
-                username,
-                password,
-                notes,
+                website, username, password, notes,
                 createdAt: new Date().toISOString()
             });
             showToast('Password added successfully!');
         } else {
             await update(ref(database, `users/${currentUser.uid}/passwords/${id}`), {
-                website,
-                username,
-                password,
-                notes,
+                website, username, password, notes,
                 updatedAt: new Date().toISOString()
             });
             showToast('Password updated successfully!');
         }
-        
+
         selectedPasswordId = id;
         passwordSearchInput.value = '';
         passwordForm.reset();
@@ -877,14 +967,14 @@ passwordForm.addEventListener('submit', async (e) => {
 // Cancel Form
 cancelFormBtn.addEventListener('click', () => {
     passwordForm.reset();
-    const selectedPassword = allPasswords.find((password) => password.id === selectedPasswordId);
+    const selectedPassword = allPasswords.find((p) => p.id === selectedPasswordId);
 
     if (selectedPassword) {
         selectPassword(selectedPassword.id);
     } else if (allPasswords.length > 0) {
         selectPassword(allPasswords[0].id);
     } else {
-        showEmptyState('Your vault is empty', 'Add your first password or import a JSON backup.');
+        showEmptyState('Your vault is empty', 'Add your first password or import from a CSV or JSON file.');
     }
 });
 
@@ -893,22 +983,22 @@ function resetUI() {
     passwordForm.reset();
     document.getElementById('loginForm').reset();
     document.getElementById('registerForm').reset();
-    document.getElementById('loginError').textContent = '';
+    document.getElementById('loginError').textContent    = '';
     document.getElementById('registerError').textContent = '';
-    resetError.textContent = '';
-    resetSuccess.textContent = '';
-    changePasswordError.textContent = '';
+    resetError.textContent           = '';
+    resetSuccess.textContent         = '';
+    changePasswordError.textContent  = '';
     changePasswordSuccess.textContent = '';
-    forgotPasswordModal.style.display = 'none';
-    changePasswordModal.style.display = 'none';
-    userDropdown.style.display = 'none';
-    userEmailLabel.textContent = '';
-    allPasswords = [];
-    selectedPasswordId = null;
-    passwordSearchInput.value = '';
-    passwordCountBadge.textContent = '0';
-    noPasswordsMessage.style.display = 'none';
-    passwordListContainer.innerHTML = '';
+    forgotPasswordModal.style.display  = 'none';
+    changePasswordModal.style.display  = 'none';
+    userDropdown.style.display         = 'none';
+    userEmailLabel.textContent         = '';
+    allPasswords                       = [];
+    selectedPasswordId                 = null;
+    passwordSearchInput.value          = '';
+    passwordCountBadge.textContent     = '0';
+    noPasswordsMessage.style.display   = 'none';
+    passwordListContainer.innerHTML    = '';
     closeMobileMenu();
     showEmptyState('No Password Selected', 'Add a new password or select one from the list to get started');
     document.querySelector('[data-tab="login"]').click();
