@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureFire | Professional Password Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="logo-icon">
+                            <path d="M478-371Zm112 211H250q-86 0-148-62T40-370q0-78 49.5-137.5T217-579q20-97 94-158.5T482-799q112 0 187.5 79T748-529q-16 2-31.05 5.97Q701.89-519.06 688-512v-10q0-89-60.5-153T478-739q-89 0-150 64t-61 153h-19q-62 0-105 43.5T100-371q0 62 43.93 106.5T250-220h340v60Zm95 0q-14 0-24.5-10.5T650-195v-120q0-14 11.5-24.5T690-350v-45q0-30.94 22.04-52.97 22.05-22.03 53-22.03Q796-470 818-447.97T840-395v45q17 0 28.5 10.5T880-315v120q0 14-10.5 24.5T845-160H685Zm35-190h90v-44.91Q810-414 797.09-427q-12.91-13-32-13T733-427.06q-13 12.93-13 32.06v45Z"/>
+                        </svg>
+                    </div>
+                    <h1>SecureFire</h1>
+                    <p class="tagline">Your Secure Password Vault</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">Login</button>
+                    <button class="tab-btn" data-tab="register">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form active">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <div class="input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                                <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-260 320-200v-120L160-520v120l320 200Z"/>
+                            </svg>
+                            <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                                <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                            </svg>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" required>
+                            <button type="button" class="toggle-password" data-target="loginPassword">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                    <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Login</button>
+                    <div class="login-footer">
+                        <button type="button" id="forgotPasswordLink" class="forgot-password-link">Forgot Password?</button>
+                    </div>
+                    <p class="error-message" id="loginError"></p>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="registerEmail">Email Address</label>
+                        <div class="input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                                <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-260 320-200v-120L160-520v120l320 200Z"/>
+                            </svg>
+                            <input type="email" id="registerEmail" placeholder="Enter your email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <div class="input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                                <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                            </svg>
+                            <input type="password" id="registerPassword" placeholder="Create a password" autocomplete="new-password" required>
+                            <button type="button" class="toggle-password" data-target="registerPassword">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                    <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                                <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                            </svg>
+                            <input type="password" id="confirmPassword" placeholder="Confirm your password" autocomplete="new-password" required>
+                            <button type="button" class="toggle-password" data-target="confirmPassword">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                    <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Register</button>
+                    <p class="error-message" id="registerError"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal" style="display: none;">
+        <div class="modal-content forgot-password-form">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button id="closeForgotModal" class="close-modal">×</button>
+            </div>
+            <p class="modal-description">Enter your email address and we'll send you instructions to reset your password.</p>
+            <form id="forgotPasswordFormElement">
+                <div class="form-group">
+                    <label for="resetEmail">Email Address</label>
+                    <div class="input-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                            <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-260 320-200v-120L160-520v120l320 200Z"/>
+                        </svg>
+                        <input type="email" id="resetEmail" placeholder="Enter your email" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Send Reset Link</button>
+                    <button type="button" id="cancelResetBtn" class="btn-secondary">Cancel</button>
+                </div>
+                <p class="error-message" id="resetError"></p>
+                <p class="success-message" id="resetSuccess"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content change-password-form">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button id="closeChangeModal" class="close-modal">×</button>
+            </div>
+            <form id="changePasswordFormElement">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <div class="input-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                            <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                        </svg>
+                        <input type="password" id="currentPassword" placeholder="Enter current password" autocomplete="current-password" required>
+                        <button type="button" class="toggle-password" data-target="currentPassword">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <div class="input-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                            <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                        </svg>
+                        <input type="password" id="newPassword" placeholder="Enter new password" autocomplete="new-password" required>
+                        <button type="button" class="toggle-password" data-target="newPassword">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Confirm New Password</label>
+                    <div class="input-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="input-icon">
+                            <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                        </svg>
+                        <input type="password" id="confirmNewPassword" placeholder="Confirm new password" autocomplete="new-password" required>
+                        <button type="button" class="toggle-password" data-target="confirmNewPassword">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Update Password</button>
+                    <button type="button" id="cancelChangeBtn" class="btn-secondary">Cancel</button>
+                </div>
+                <p class="error-message" id="changePasswordError"></p>
+                <p class="success-message" id="changePasswordSuccess"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="appContainer" class="app-container" style="display: none;">
+        <!-- Navigation Header -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <button id="mobileMenuBtn" class="mobile-menu-btn" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                        <path d="M120-240v-80h720v80H120Zm0-210v-80h720v80H120Zm0-210v-80h720v80H120Z"/>
+                    </svg>
+                </button>
+                <div class="brand">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="brand-icon">
+                        <path d="M478-371Zm112 211H250q-86 0-148-62T40-370q0-78 49.5-137.5T217-579q20-97 94-158.5T482-799q112 0 187.5 79T748-529q-16 2-31.05 5.97Q701.89-519.06 688-512v-10q0-89-60.5-153T478-739q-89 0-150 64t-61 153h-19q-62 0-105 43.5T100-371q0 62 43.93 106.5T250-220h340v60Zm95 0q-14 0-24.5-10.5T650-195v-120q0-14 11.5-24.5T690-350v-45q0-30.94 22.04-52.97 22.05-22.03 53-22.03Q796-470 818-447.97T840-395v45q17 0 28.5 10.5T880-315v120q0 14-10.5 24.5T845-160H685Zm35-190h90v-44.91Q810-414 797.09-427q-12.91-13-32-13T733-427.06q-13 12.93-13 32.06v45Z"/>
+                    </svg>
+                    <span>SecureFire</span>
+                </div>
+                <div class="nav-actions">
+                    <div class="user-menu">
+                        <button id="userButton" class="user-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                <path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-33 17-62t47-44q51-26 115-39t141-13q77 0 141 13t115 39q30 15 47 44t17 62v112H160Z"/>
+                            </svg>
+                        </button>
+                        <div id="userDropdown" class="user-dropdown" style="display: none;">
+                            <div class="dropdown-user">
+                                <span class="dropdown-label">Signed in as</span>
+                                <span id="userEmailLabel" class="dropdown-email"></span>
+                            </div>
+                            <hr class="dropdown-divider">
+                            <button id="changePasswordBtn" class="dropdown-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                    <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                                </svg>
+                                Change Password
+                            </button>
+                            <hr class="dropdown-divider">
+                            <button id="logoutBtn" class="dropdown-item logout">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                    <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 160 160-160 160Z"/>
+                                </svg>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Sidebar Overlay (Mobile) -->
+                <div id="sidebarOverlay" class="sidebar-overlay"></div>
+                
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="sidebar-header">
+                        <div>
+                            <p class="sidebar-kicker">Vault</p>
+                            <h2>Passwords</h2>
+                        </div>
+                        <span id="passwordCountBadge" class="count-badge">0</span>
+                    </div>
+                    <div class="search-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="search-icon">
+                            <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                        </svg>
+                        <input type="search" id="passwordSearchInput" placeholder="Search vault" aria-label="Search passwords">
+                    </div>
+                    <button id="addPasswordBtn" class="btn-primary-sidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                        </svg>
+                        Add Password
+                    </button>
+                    <div class="vault-actions">
+                        <button id="importPasswordsBtn" class="btn-secondary-sidebar" type="button" title="Import passwords">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                <path d="M440-160v-327L336-383l-56-57 200-200 200 200-56 57-104-104v327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Zm0-680h480v160h80v-160q0-33-23.5-56.5T720-840H240q-33 0-56.5 23.5T160-760v160h80v-160Z"/>
+                            </svg>
+                            Import
+                        </button>
+                        <button id="exportPasswordsBtn" class="btn-secondary-sidebar" type="button" title="Export passwords">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                <path d="M440-800v327L336-577l-56 57 200 200 200-200-56-57-104 104v-327h-80ZM240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Zm0-680h480v160h80v-160q0-33-23.5-56.5T720-840H240q-33 0-56.5 23.5T160-760v160h80v-160Z"/>
+                            </svg>
+                            Export
+                        </button>
+                        <input type="file" id="importPasswordsInput" accept=".json,application/json" hidden>
+                    </div>
+                    <div class="password-list">
+                        <h3>Your Passwords</h3>
+                        <div id="passwordListContainer" class="list-container"></div>
+                        <p id="noPasswordsMessage" class="list-empty" style="display: none;"></p>
+                    </div>
+                </aside>
+
+                <!-- Main Panel -->
+                <section class="main-panel">
+                    <!-- Empty State -->
+                    <div id="emptyState" class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="empty-icon">
+                            <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/>
+                        </svg>
+                        <h2 id="emptyStateTitle">No Password Selected</h2>
+                        <p id="emptyStateText">Add a new password or select one from the list to get started</p>
+                        <div class="empty-actions">
+                            <button id="emptyAddPasswordBtn" class="btn-primary" type="button">Add Password</button>
+                            <button id="emptyImportPasswordsBtn" class="btn-secondary" type="button">Import</button>
+                        </div>
+                    </div>
+
+                    <!-- Password Detail View -->
+                    <div id="passwordDetailView" class="password-detail" style="display: none;">
+                        <div class="detail-header">
+                            <div>
+                                <p class="detail-kicker">Vault Item</p>
+                                <h2 id="detailTitle"></h2>
+                                <p id="detailSubtitle" class="detail-subtitle"></p>
+                            </div>
+                            <div class="detail-actions">
+                                <button id="editPasswordBtn" class="btn-icon" title="Edit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M200-200h57l391-391-57-57-391 391v57Zm-40 40v-98l468-468q19-19 45-19t45 19l98 98q19 19 19 45t-19 45L268-160H160Zm519-504L504-760l56-56q23-23 56.5-23t55.5 23l56 56q23 23 23 56.5T728-647l-49 49Z"/>
+                                    </svg>
+                                </button>
+                                <button id="copyPasswordBtn" class="btn-icon" title="Copy Password">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/>
+                                    </svg>
+                                </button>
+                                <button id="deletePasswordBtn" class="btn-icon danger" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm100-160h80v-360h-80v360Zm200 0h80v-360h-80v360Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-field">
+                                <label>Website/Service</label>
+                                <div class="field-value" id="detailWebsite"></div>
+                            </div>
+                            <div class="detail-field">
+                                <label>Username/Email</label>
+                                <div class="field-value" id="detailUsername"></div>
+                            </div>
+                            <div class="detail-field">
+                                <label>Password</label>
+                                <div class="password-display">
+                                    <div class="field-value masked" id="detailPassword"></div>
+                                    <button id="revealPasswordBtn" class="btn-reveal" type="button">Reveal</button>
+                                </div>
+                            </div>
+                            <div class="detail-field" id="notesFieldContainer" style="display: none;">
+                                <label>Notes</label>
+                                <div class="field-value" id="detailNotes"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add/Edit Form -->
+                    <div id="passwordFormView" class="password-form" style="display: none;">
+                        <h2 id="formTitle">Add New Password</h2>
+                        <p class="form-subtitle">Save the service, username, password, and any notes together.</p>
+                        <form id="passwordForm">
+                            <div class="form-group">
+                                <label for="formWebsite">Website/Service *</label>
+                                <input type="text" id="formWebsite" placeholder="e.g., Gmail, Facebook, Bank" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="formUsername">Username/Email *</label>
+                                <input type="text" id="formUsername" placeholder="Your username or email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="formPassword">Password *</label>
+                                <div class="input-wrapper">
+                                    <input type="password" id="formPassword" placeholder="Enter password" autocomplete="current-password" required>
+                                    <button type="button" class="toggle-password" data-target="formPassword">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="eye-icon">
+                                            <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81T40-500q80-143 200-224t260-81q140 0 260 81t200 224q-80 143-200 224t-260 81Z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="formNotes">Notes</label>
+                                <textarea id="formNotes" placeholder="Add any notes about this password..." rows="3"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Save Password</button>
+                                <button type="button" id="cancelFormBtn" class="btn-secondary">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
