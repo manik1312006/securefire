@@ -582,12 +582,22 @@ dom.passwordForm.addEventListener('submit', async (e) => {
     let id = dom.passwordForm.dataset.id;
 
     if (mode === 'add') {
-      id = createPasswordId();
-      await set(ref(database, `users/${currentUser.uid}/passwords/${id}`), {
-        website, username, password, notes,
-        createdAt: new Date().toISOString()
-      });
-      showToast('Password added!');
+      const dup = findDuplicate(website, username);
+      if (dup) {
+        id = dup.id;
+        await update(ref(database, `users/${currentUser.uid}/passwords/${id}`), {
+          website, username, password, notes,
+          updatedAt: new Date().toISOString()
+        });
+        showToast('Duplicate merged — entry updated');
+      } else {
+        id = createPasswordId();
+        await set(ref(database, `users/${currentUser.uid}/passwords/${id}`), {
+          website, username, password, notes,
+          createdAt: new Date().toISOString()
+        });
+        showToast('Password added!');
+      }
     } else {
       await update(ref(database, `users/${currentUser.uid}/passwords/${id}`), {
         website, username, password, notes,
@@ -733,18 +743,26 @@ dom.importPasswordsInput.addEventListener('change', async () => {
 
     if (toImport.length === 0) { showToast('No valid passwords found in that file'); return; }
     if (!confirm(`Import ${toImport.length} password${toImport.length === 1 ? '' : 's'} into your vault?`)) return;
-
     showLoading();
     const now = new Date().toISOString();
     const updates = {};
-    toImport.forEach((p, i) => {
-      const id = createPasswordId(i);
-      updates[`users/${currentUser.uid}/passwords/${id}`] = { ...p, createdAt: p.createdAt || now };
+    let merged = 0, created = 0;
+
+    toImport.forEach((p) => {
+      const dup = findDuplicate(p.website, p.username);
+      const id = dup ? dup.id : createPasswordId();
+      const entry = { ...p, createdAt: p.createdAt || dup?.createdAt || now };
+      if (dup) entry.updatedAt = now;
+      updates[`users/${currentUser.uid}/passwords/${id}`] = entry;
+      if (dup) merged++; else created++;
     });
     await update(ref(database), updates);
     dom.passwordSearchInput.value = '';
     await loadPasswords();
-    showToast(`Imported ${toImport.length} password${toImport.length === 1 ? '' : 's'}`);
+    const msg = merged > 0
+      ? `Imported ${created} new, merged ${merged} duplicate${merged === 1 ? '' : 's'}`
+      : `Imported ${created} password${created === 1 ? '' : 's'}`;
+    showToast(msg);
   } catch {
     showToast('Import failed. Choose a valid CSV or JSON file.');
   } finally {
@@ -781,6 +799,13 @@ function normalizeImportedPassword(record) {
 
 function createPasswordId(index = 0) {
   return `${Date.now().toString(36)}-${index}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function findDuplicate(website, username) {
+  return allPasswords.find(p =>
+    p.website?.toLowerCase() === website.toLowerCase() &&
+    p.username?.toLowerCase() === username.toLowerCase()
+  );
 }
 
 // ==============================
